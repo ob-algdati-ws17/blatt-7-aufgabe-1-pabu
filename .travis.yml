@@ -3,11 +3,6 @@ language: cpp
 compiler:
     - clang
 
-script:
-
-  - mkdir build
-  - cd build && cmake ..
-
 before_script:
   - rm -rf build
   - mkdir build
