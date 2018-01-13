@@ -11,15 +11,17 @@ class AVLTree {
 private:
     struct Node {
         const int key;
-        int bal;
+        int bal = 0;
         Node *left = nullptr;
         Node *right = nullptr;
-        Node *prev = nullptr;
+        Node *parent = nullptr;
 
         Node(const int);
         Node(const int, Node *, Node *);
 
-        void insert(const int);
+        /// Helper
+        void setLeftChild(Node*);
+        void setRightChild(Node*);
 
         std::vector<int> *preorder() const; // (Hauptreihenfolge)
         std::vector<int> *inorder() const; // (Symmetrische Reihenfolge)
@@ -27,6 +29,14 @@ private:
 
         ~Node();
     };
+
+    /// Private Modification Helpers
+    void insert(Node*, const int);
+    /// Balancing
+    void upin(Node*);
+    /// Rotations
+    Node* rotateLeft(Node*);
+    Node* rotateRight(Node*);
 
     Node *root = nullptr;
 public:
