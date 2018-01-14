@@ -185,7 +185,7 @@ void AVLTree::removeNodeWithTwoLeaves(Node* node) {
                     rotateRight(parent->right, parent->right);
                     newRoot = rotateLeft(parent, *anchor);
                 }
-                upout(node);
+                upout(newRoot);
                 node->removeMeFromMyParent();
                 break;
         }
