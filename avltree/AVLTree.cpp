@@ -29,6 +29,36 @@ AVLTree::Node::~Node() {
 }
 
 /**
+ * Search
+ */
+
+
+bool AVLTree::search(const int value) const {
+    if(root == nullptr)
+        // key not found
+        return false;
+
+    return root->search(value);
+}
+
+bool AVLTree::Node::search(const int value) const {
+    if (this->key == value)
+        return true;
+
+    Node* next = nullptr;
+    if (value < this->key && this->left != nullptr) {
+        next = this->left;
+    } else if (this->right != nullptr) {
+        next = this->right;
+    }
+
+    if (next == nullptr)
+        return false;
+
+    return next->search(value);
+}
+
+/**
  * Insert
  */
 

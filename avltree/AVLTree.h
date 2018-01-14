@@ -23,6 +23,8 @@ private:
         void setLeftChild(Node*);
         void setRightChild(Node*);
 
+        bool search(const int value) const;
+
         std::vector<int> *preorder() const; // (Hauptreihenfolge)
         std::vector<int> *inorder() const; // (Symmetrische Reihenfolge)
         std::vector<int> *postorder() const; // (Nebenreihenfolge)
@@ -42,6 +44,7 @@ private:
 public:
     ~AVLTree();
 
+    bool search(const int value) const;
     void insert(const int);
 
     std::vector<int> *preorder() const; // Hauptreihenfolge

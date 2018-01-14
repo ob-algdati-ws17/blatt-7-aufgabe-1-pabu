@@ -131,4 +131,22 @@ TEST(AVLTreeTest, Insert_And_Rotate_Left_Right) {
     EXPECT_THAT(*tree.preorder(), testing::ElementsAre(70, 50, 30, 60, 100, 150));
     EXPECT_THAT(*tree.inorder(), testing::ElementsAre(30, 50, 60, 70, 100, 150));
     EXPECT_THAT(*tree.postorder(), testing::ElementsAre(30, 60, 50, 150, 100, 70));
+
+/********************************************************************
+ * SEARCH
+ *******************************************************************/
+
+TEST(AVLTreeTest, Search_In_Tree) {
+    AVLTree tree;
+    EXPECT_FALSE(tree.search(50));
+
+    tree.insert(100);
+    tree.insert(50);
+    tree.insert(150);
+    tree.insert(30);
+    tree.insert(70);
+    tree.insert(60);
+
+    EXPECT_FALSE(tree.search(200));
+    EXPECT_TRUE(tree.search(150));
 }
