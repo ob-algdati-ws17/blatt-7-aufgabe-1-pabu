@@ -95,12 +95,13 @@ void AVLTree::upin(Node* node) {
             case -1:
                 switch (node->bal) {
                     case 1:
-                        // right branch of node has h+2 -> rotate left-right
+                        // right branch of node has h+2 -> double rotate left-right
+
                         break;
 
                     case -1:
-                        Node* grandParent = node->parent->parent;
-                        // left branch of node has h+2 -> rotate right
+                        auto grandParent = parent->parent;
+                        // left branch of node has h+1 -> rotate right
                         auto rotatedSubTree = rotateRight(parent);
 
                         if (grandParent != nullptr) {
@@ -118,7 +119,34 @@ void AVLTree::upin(Node* node) {
                 break;
 
             case 1:
-                parent->bal -= 0;
+                parent->bal -= 1;
+                break;
+        }
+    } else if (parent->right == node) {
+        switch (parent->bal) {
+            case -1:
+                parent->bal += 1;
+                break;
+            case 0:
+                parent->bal += 1;
+                upin(parent);
+                break;
+            case 1:
+                switch (node->bal) {
+                    case -1:
+                        // left branch of node has h+2 -> double rotate left-right
+                        break;
+                    case 1:
+                        auto grandParent = parent->parent;
+                        auto rotatedSubTree = rotateLeft(parent);
+
+                        if (grandParent != nullptr) {
+                            grandParent->setRightChild(rotatedSubTree);
+                        } else {
+                            root = rotatedSubTree;
+                        }
+                        break;
+                }
                 break;
         }
     }
@@ -150,7 +178,7 @@ AVLTree::Node *AVLTree::rotateRight(Node* node) {
 AVLTree::Node *AVLTree::rotateLeft(Node* node) {
     // temp save
     auto newRoot = node->right;
-    auto movingNode = newRoot->right;
+    auto movingNode = newRoot->left;
 
     // perform rotation
     newRoot->setLeftChild(node);

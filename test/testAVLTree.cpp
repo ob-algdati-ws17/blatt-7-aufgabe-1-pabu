@@ -51,16 +51,27 @@ TEST(AVLTreeTest, Insert_In_SingleNode_Tree) {
  */
 
 TEST(AVLTreeTest, Insert_And_Rotate_On_Root) {
-    AVLTree tree;
-    tree.insert(100);
-    tree.insert(50);
+    AVLTree treeLeft;
+    treeLeft.insert(100);
+    treeLeft.insert(50);
 
     // now right rotation at root level is needed
-    tree.insert(30);
+    treeLeft.insert(30);
 
-    EXPECT_THAT(*tree.preorder(), testing::ElementsAre(50, 30, 100));
-    EXPECT_THAT(*tree.inorder(), testing::ElementsAre(30, 50, 100));
-    EXPECT_THAT(*tree.postorder(), testing::ElementsAre(30, 100, 50));
+    EXPECT_THAT(*treeLeft.preorder(), testing::ElementsAre(50, 30, 100));
+    EXPECT_THAT(*treeLeft.inorder(), testing::ElementsAre(30, 50, 100));
+    EXPECT_THAT(*treeLeft.postorder(), testing::ElementsAre(30, 100, 50));
+
+    AVLTree treeRight;
+    treeRight.insert(100);
+    treeRight.insert(150);
+
+    // now right rotation at root level is needed
+    treeRight.insert(200);
+
+    EXPECT_THAT(*treeRight.preorder(), testing::ElementsAre(150, 100, 200));
+    EXPECT_THAT(*treeRight.inorder(), testing::ElementsAre(100, 150, 200));
+    EXPECT_THAT(*treeRight.postorder(), testing::ElementsAre(100, 200, 150));
 }
 
 TEST(AVLTreeTest, Insert_And_Rotate_Right) {
@@ -80,4 +91,23 @@ TEST(AVLTreeTest, Insert_And_Rotate_Right) {
     EXPECT_THAT(*tree.preorder(), testing::ElementsAre(100, 30, 20, 50, 150));
     EXPECT_THAT(*tree.inorder(), testing::ElementsAre(20, 30, 50, 100, 150));
     EXPECT_THAT(*tree.postorder(), testing::ElementsAre(20, 50, 30, 150, 100));
+}
+
+TEST(AVLTreeTest, Insert_And_Rotate_Left) {
+    AVLTree tree;
+    tree.insert(100);
+    tree.insert(50);
+    tree.insert(150);
+    tree.insert(200);
+
+    EXPECT_THAT(*tree.preorder(), testing::ElementsAre(100, 50, 150, 200));
+    EXPECT_THAT(*tree.inorder(), testing::ElementsAre(50, 100, 150, 200));
+    EXPECT_THAT(*tree.postorder(), testing::ElementsAre(50, 200, 150, 100));
+
+    // now right rotation at root level is needed
+    tree.insert(300);
+
+    EXPECT_THAT(*tree.preorder(), testing::ElementsAre(100, 50, 200, 150, 300));
+    EXPECT_THAT(*tree.inorder(), testing::ElementsAre(50, 100, 150, 200, 300));
+    EXPECT_THAT(*tree.postorder(), testing::ElementsAre(50, 150, 300, 200, 100));
 }
