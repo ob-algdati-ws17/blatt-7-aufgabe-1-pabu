@@ -111,3 +111,24 @@ TEST(AVLTreeTest, Insert_And_Rotate_Left) {
     EXPECT_THAT(*tree.inorder(), testing::ElementsAre(50, 100, 150, 200, 300));
     EXPECT_THAT(*tree.postorder(), testing::ElementsAre(50, 150, 300, 200, 100));
 }
+
+TEST(AVLTreeTest, Insert_And_Rotate_Left_Right) {
+    AVLTree tree;
+    tree.insert(100);
+    tree.insert(50);
+    tree.insert(150);
+    tree.insert(30);
+
+    EXPECT_THAT(*tree.preorder(), testing::ElementsAre(100, 50, 30, 150));
+    EXPECT_THAT(*tree.inorder(), testing::ElementsAre(30, 50, 100, 150));
+    EXPECT_THAT(*tree.postorder(), testing::ElementsAre(30, 50, 150, 100));
+
+    // now right rotation at root level is needed
+    tree.insert(70);
+    tree.insert(60);
+
+    // TODO: Look for balance, is -2 for 70 or 100 is not +1
+    EXPECT_THAT(*tree.preorder(), testing::ElementsAre(70, 50, 30, 60, 100, 150));
+    EXPECT_THAT(*tree.inorder(), testing::ElementsAre(30, 50, 60, 70, 100, 150));
+    EXPECT_THAT(*tree.postorder(), testing::ElementsAre(30, 60, 50, 150, 100, 70));
+}

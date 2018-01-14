@@ -95,20 +95,16 @@ void AVLTree::upin(Node* node) {
             case -1:
                 switch (node->bal) {
                     case 1:
-                        // right branch of node has h+2 -> double rotate left-right
+                        // left branch of node has h+2 -> double rotate left-right
+                        rotateLeft(node, parent->left);
+                        rotateRight(parent, ((parent->parent != nullptr ? parent->parent->left : root)));
 
+                        parent->parent->bal = 0;
                         break;
 
                     case -1:
-                        auto grandParent = parent->parent;
                         // left branch of node has h+1 -> rotate right
-                        auto rotatedSubTree = rotateRight(parent);
-
-                        if (grandParent != nullptr) {
-                            grandParent->setLeftChild(rotatedSubTree);
-                        } else {
-                            root = rotatedSubTree;
-                        }
+                        rotateRight(parent, (parent->parent != nullptr ? parent->parent->left : root));
                         break;
                 }
                 break;
@@ -134,17 +130,14 @@ void AVLTree::upin(Node* node) {
             case 1:
                 switch (node->bal) {
                     case -1:
-                        // left branch of node has h+2 -> double rotate left-right
+                        // right branch of node has h+2 -> double rotate left-right
+                        rotateRight(node, parent->right);
+                        rotateLeft(parent, (parent->parent != nullptr ? parent->parent->right : root));
+
                         break;
                     case 1:
-                        auto grandParent = parent->parent;
-                        auto rotatedSubTree = rotateLeft(parent);
+                        rotateLeft(parent, (parent->parent != nullptr ? parent->parent->right : root));
 
-                        if (grandParent != nullptr) {
-                            grandParent->setRightChild(rotatedSubTree);
-                        } else {
-                            root = rotatedSubTree;
-                        }
                         break;
                 }
                 break;
@@ -157,7 +150,7 @@ void AVLTree::upin(Node* node) {
  */
 
 /// Rotate right (sub)tree where root is given node & return rotated (sub)tree with new root
-AVLTree::Node *AVLTree::rotateRight(Node* node) {
+AVLTree::Node *AVLTree::rotateRight(Node* node, Node* &anchor) {
     // temp save
     auto newRoot = node->left;
     auto movingNode = newRoot->right;
@@ -168,14 +161,19 @@ AVLTree::Node *AVLTree::rotateRight(Node* node) {
     newRoot->parent = nullptr;
 
     // balance
-    node->bal += 1;
+    // TODO: right calculation for double rotation
+    node->bal +=1;
     newRoot->bal += 1;
+
+    // reattach newRoot at anchor
+    newRoot->parent = anchor->parent;
+    anchor = newRoot;
 
     return newRoot;
 }
 
 /// Rotate left (sub)tree where root is given node & return rotated (sub)tree with new root
-AVLTree::Node *AVLTree::rotateLeft(Node* node) {
+AVLTree::Node *AVLTree::rotateLeft(Node* node, Node* &anchor) {
     // temp save
     auto newRoot = node->right;
     auto movingNode = newRoot->left;
@@ -186,9 +184,14 @@ AVLTree::Node *AVLTree::rotateLeft(Node* node) {
     newRoot->parent = nullptr;
 
     // balance
+    // TODO: right calculation for double rotation
     node->bal -= 1;
     newRoot->bal -= 1;
 
+
+    // reattach newRoot at anchor
+    newRoot->parent = anchor->parent;
+    anchor = newRoot;
 
     return newRoot;
 }

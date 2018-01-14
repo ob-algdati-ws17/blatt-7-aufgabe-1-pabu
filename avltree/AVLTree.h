@@ -35,8 +35,8 @@ private:
     /// Balancing
     void upin(Node*);
     /// Rotations
-    Node* rotateLeft(Node*);
-    Node* rotateRight(Node*);
+    Node* rotateLeft(Node*, Node* &);
+    Node* rotateRight(Node*, Node* &);
 
     Node *root = nullptr;
 public:
