@@ -10,20 +10,25 @@
 class AVLTree {
 private:
     struct Node {
-        const int key;
+        int key;
         int bal = 0;
         Node *left = nullptr;
         Node *right = nullptr;
         Node *parent = nullptr;
 
-        Node(const int);
-        Node(const int, Node *, Node *);
+        Node(int);
+        Node(int, Node *, Node *);
 
+        bool isBalanced() const;
         /// Helper
         void setLeftChild(Node*);
         void setRightChild(Node*);
+        bool hasOnlyOneChild();
 
         bool search(const int value) const;
+
+        void removeMeFromMyParent();
+
 
         std::vector<int> *preorder() const; // (Hauptreihenfolge)
         std::vector<int> *inorder() const; // (Symmetrische Reihenfolge)
@@ -33,19 +38,28 @@ private:
     };
 
     /// Private Modification Helpers
-    void insert(Node*, const int);
+    void insert(Node*, int);
+
     /// Balancing
     void upin(Node*);
+    void upout(Node*);
+
+    void removeNodeWithTwoLeaves(Node*);
+    void removeNodeWithOneLeaf(Node*);
+    void removeNodeWithNoLeaves(Node*);
+
     /// Rotations
     Node* rotateLeft(Node*, Node* &);
     Node* rotateRight(Node*, Node* &);
 
-    Node *root = nullptr;
+    //Node *root = nullptr;
 public:
+    Node *root = nullptr;
     ~AVLTree();
 
-    bool search(const int value) const;
-    void insert(const int);
+    bool search(int) const;
+    void insert(int);
+    void remove(int);
 
     std::vector<int> *preorder() const; // Hauptreihenfolge
     std::vector<int> *inorder() const; // Symmetrische Reihenfolge

@@ -109,7 +109,175 @@ void AVLTree::insert(Node* node, const int value) {
 }
 
 /**
- * Upin & Balance
+ * Remove
+ */
+void AVLTree::remove(const int value) {
+    // check if AVLTree root exists
+    if (root == nullptr)
+        return;
+
+    if(root->key == value && root->right == nullptr && root->left == nullptr) {
+        root = nullptr;
+        return;
+    }
+
+    Node* next = root;
+    // search for relevant node
+    while(next->key != value) {
+        if (value < next->key && next->left != nullptr) {
+            next = next->left;
+        }
+        else if (next->right != nullptr) {
+            next = next->right;
+        }
+        else {
+            return;
+        }
+    }
+
+    // case 1 - node has no leaves
+    if (next->left == nullptr && next->right == nullptr) {
+        removeNodeWithTwoLeaves(next);
+        return;
+    }
+
+    // case 2 - has only one leaf
+    if (next->hasOnlyOneChild()) {
+        removeNodeWithOneLeaf(next);
+        return;
+    }
+
+    // case 3 - has two leaves
+    if (next->left != nullptr && next->right != nullptr) {
+        removeNodeWithNoLeaves(next);
+        return;
+    }
+}
+
+void AVLTree::removeNodeWithTwoLeaves(Node* node) {
+    auto parent = node->parent;
+
+    // remove node and adjust parents balance
+    if (parent->left == node) {
+        parent->bal += 1;
+
+        switch (parent->bal) {
+            case 0:
+                // height changes
+                node->removeMeFromMyParent();
+                upout(parent);
+                break;
+            case 1:
+                node->removeMeFromMyParent();
+                break;
+            case 2:
+                upout(node);
+                node->removeMeFromMyParent();
+                break;
+        }
+    }
+    else if (parent->right == node){
+        parent->bal -= 1;
+
+        switch (parent->bal) {
+            case 0:
+                // height changes causing parent is now balanced -> upout(parent)
+                node->removeMeFromMyParent();
+                upout(parent);
+                break;
+            case -1:
+                // no height changes, parent has still a child
+                node->removeMeFromMyParent();
+                break;
+            case -2:
+                // need rotation cause balance is out of bounds
+                Node* newRoot = nullptr;
+                Node** anchor = nullptr;
+                if (parent->parent == nullptr) {
+                    anchor = &root;
+                } else {
+                    anchor = parent->parent->left == parent->parent ? &parent->left : &parent->right;
+                }
+
+                if (parent->left->right == nullptr) {
+                    newRoot = rotateRight(parent, *anchor);
+                } else {
+                    rotateLeft(parent->left, parent->left);
+                    newRoot = rotateRight(parent, *anchor);
+                }
+                upout(newRoot);
+                node->removeMeFromMyParent();
+                break;
+        }
+    }
+}
+
+void AVLTree::removeNodeWithOneLeaf(Node* node) {
+    if (node->left != nullptr) {
+        // TODO: not sure
+        node->parent->bal += 1;
+
+        // assign node's parent as parent of child
+        node->left->parent = node->parent;
+
+        // assign node's child as child of node's parent
+        if (node->parent->left == node) {
+            node->parent->left = node->left;
+        } else {
+            node->parent->right = node->left;
+        }
+
+        upout(node->left);
+        node->removeMeFromMyParent();
+    } else {
+        // TODO: not sure
+        node->parent->bal -= 1;
+
+        // assign node's parent as parent of child
+        node->right->parent = node->parent;
+
+        // assign node's child as child of node's parent
+        if (node->parent->left == node) {
+            node->parent->left = node->right;
+        } else {
+            node->parent->right = node->right;
+        }
+
+        upout(node->right);
+        node->removeMeFromMyParent();
+    }
+}
+
+void AVLTree::removeNodeWithNoLeaves(Node* node) {
+    // symmetric predecessor
+    auto predecessor = node->left;
+    // go along leftest branch and find smallest node with key > node.key
+    while (predecessor->right != nullptr) {
+        predecessor = predecessor->right;
+    }
+
+    // replace node key with symmetric predecessor key
+    node->key = predecessor->key;
+
+    if (predecessor->hasOnlyOneChild()) {
+        removeNodeWithOneLeaf(predecessor);
+    } else {
+        removeNodeWithTwoLeaves(predecessor);
+    }
+}
+
+void AVLTree::Node::removeMeFromMyParent() {
+    if (this->parent->left == this) {
+        this->parent->left = nullptr;
+    } else {
+        this->parent->right = nullptr;
+    }
+    this->parent = nullptr;
+}
+
+
+/**
+ * Upin & Upout & Balance
  */
 
 void AVLTree::upin(Node* node) {
@@ -130,6 +298,7 @@ void AVLTree::upin(Node* node) {
                         rotateRight(parent, ((parent->parent != nullptr ? parent->parent->left : root)));
 
                         parent->parent->bal = 0;
+                        parent->bal += 1;
                         break;
 
                     case -1:
@@ -175,6 +344,88 @@ void AVLTree::upin(Node* node) {
     }
 }
 
+void AVLTree::upout(Node* node) {
+    if ((node->bal != 0) || (node == root)) { return; }
+
+    // node is left son
+    if (node->parent->left == node) {
+        switch (node->parent->bal) {
+            case -1: {
+                node->parent->bal = 0;
+                upout(node->parent);
+                break;
+            }
+            case 0: {
+                node->parent->bal = 1;
+                break;
+            }
+            case 1: {
+                switch (node->parent->right->bal) {
+                    case -1: {
+                        rotateRight(node->parent->right, node->parent->right);
+                        auto newRootDouble = rotateLeft(node->parent, (node->parent->parent->left == node->parent
+                                                                       ? node->parent->parent->left
+                                                                       : node->parent->parent->right));
+                        upout(newRootDouble);
+                        break;
+                    }
+                    case 0: {
+                        rotateLeft(node->parent,
+                                   (node->parent->parent->left == node->parent ? node->parent->parent->left
+                                                                               : node->parent->parent->right));
+                        node->parent->bal = 1;
+                        node->parent->parent->bal = -1;
+                        break;
+                    }
+                    case 1: {
+                        auto newRoot = rotateLeft(node->parent, (node->parent->parent->left == node->parent
+                                                                 ? node->parent->parent->left
+                                                                 : node->parent->parent->right));
+                        upout(newRoot);
+                        break;
+                    }
+                }
+            }
+        }
+    } else if (node->parent->right == node) {
+        switch (node->parent->bal) {
+            case -1: {
+                switch (node->parent->right->bal) {
+                    case -1: {
+                        auto newRoot = rotateRight(node->parent, (node->parent->parent->left == node->parent ? node->parent->parent->left : node->parent->parent->right));
+                        upout(newRoot);
+                        break;
+                    }
+
+                    case 0: {
+                        rotateRight(node->parent, (node->parent->parent->left == node->parent ? node->parent->parent->left : node->parent->parent->right));
+                        node->parent->bal = -1;
+                        node->parent->parent->bal = 1;
+                        break;
+                    }
+
+                    case 1: {
+                        rotateLeft(node->parent->left, node->parent->left);
+                        auto newRootDouble = rotateRight(node->parent, (node->parent->parent->left == node->parent ? node->parent->parent->left : node->parent->parent->right));
+                        upout(newRootDouble);
+                        break;
+                    }
+                }
+                break;
+            }
+            case 0: {
+                node->parent->bal = -1;
+                break;
+            }
+            case 1: {
+                node->parent->bal = 0;
+                upout(node->parent);
+                break;
+            }
+        }
+    }
+}
+
 /**
  * Rotation
  */
@@ -184,19 +435,17 @@ AVLTree::Node *AVLTree::rotateRight(Node* node, Node* &anchor) {
     // temp save
     auto newRoot = node->left;
     auto movingNode = newRoot->right;
+    newRoot->parent = anchor->parent;
 
     // perform rotation
     newRoot->setRightChild(node);
     node->setLeftChild(movingNode);
-    newRoot->parent = nullptr;
 
     // balance
-    // TODO: right calculation for double rotation
     node->bal +=1;
     newRoot->bal += 1;
 
     // reattach newRoot at anchor
-    newRoot->parent = anchor->parent;
     anchor = newRoot;
 
     return newRoot;
@@ -207,6 +456,7 @@ AVLTree::Node *AVLTree::rotateLeft(Node* node, Node* &anchor) {
     // temp save
     auto newRoot = node->right;
     auto movingNode = newRoot->left;
+    newRoot->parent = anchor->parent;
 
     // perform rotation
     newRoot->setLeftChild(node);
@@ -214,13 +464,11 @@ AVLTree::Node *AVLTree::rotateLeft(Node* node, Node* &anchor) {
     newRoot->parent = nullptr;
 
     // balance
-    // TODO: right calculation for double rotation
     node->bal -= 1;
     newRoot->bal -= 1;
 
 
     // reattach newRoot at anchor
-    newRoot->parent = anchor->parent;
     anchor = newRoot;
 
     return newRoot;
@@ -230,6 +478,13 @@ AVLTree::Node *AVLTree::rotateLeft(Node* node, Node* &anchor) {
 /**
  * Helper
  */
+
+bool AVLTree::Node::hasOnlyOneChild() {
+    if ((this->right != nullptr && this->left == nullptr) || (this->right == nullptr && this->left != nullptr))
+        return true;
+
+    return false;
+}
 
 void AVLTree::Node::setLeftChild(Node* child) {
     this->left = child;

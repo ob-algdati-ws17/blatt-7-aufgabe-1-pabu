@@ -127,10 +127,10 @@ TEST(AVLTreeTest, Insert_And_Rotate_Left_Right) {
     tree.insert(70);
     tree.insert(60);
 
-    // TODO: Look for balance, is -2 for 70 or 100 is not +1
     EXPECT_THAT(*tree.preorder(), testing::ElementsAre(70, 50, 30, 60, 100, 150));
     EXPECT_THAT(*tree.inorder(), testing::ElementsAre(30, 50, 60, 70, 100, 150));
     EXPECT_THAT(*tree.postorder(), testing::ElementsAre(30, 60, 50, 150, 100, 70));
+}
 
 /********************************************************************
  * SEARCH
@@ -149,4 +149,66 @@ TEST(AVLTreeTest, Search_In_Tree) {
 
     EXPECT_FALSE(tree.search(200));
     EXPECT_TRUE(tree.search(150));
+}
+
+/********************************************************************
+ * REMOVE
+ *******************************************************************/
+
+TEST(AVLTreeTest, Delete_Single_Root_Node) {
+    AVLTree tree;
+
+    tree.insert(100);
+
+    tree.remove(100);
+    EXPECT_EQ(tree.inorder(), nullptr);
+}
+
+TEST(AVLTreeTest, Delete_Node_With_Leaves) {
+    AVLTree tree;
+
+    tree.insert(100);
+    tree.insert(50);
+    tree.insert(150);
+
+    tree.remove(50);
+    EXPECT_THAT(*tree.preorder(), testing::ElementsAre(100, 150));
+    EXPECT_THAT(*tree.inorder(), testing::ElementsAre(100, 150));
+    EXPECT_THAT(*tree.postorder(), testing::ElementsAre(150, 100));
+
+    tree.remove(150);
+    EXPECT_THAT(*tree.preorder(), testing::ElementsAre(100));
+}
+
+TEST(AVLTreeTest, Delete_Node_With_No_Leaves) {
+    AVLTree tree;
+
+    tree.insert(100);
+    tree.insert(50);
+    tree.insert(150);
+    tree.insert(30);
+    tree.insert(70);
+    tree.insert(60);
+
+    tree.remove(50);
+    EXPECT_THAT(*tree.preorder(), testing::ElementsAre(70, 30, 60, 100, 150));
+    EXPECT_THAT(*tree.inorder(), testing::ElementsAre(30, 60, 70, 100, 150));
+    EXPECT_THAT(*tree.postorder(), testing::ElementsAre(60, 30, 150, 100, 70));
+}
+
+TEST(AVLTreeTest, Delete_Node_With_Left_Leave) {
+    AVLTree tree;
+
+    tree.insert(100);
+    tree.insert(50);
+    tree.insert(150);
+    tree.insert(30);
+    tree.insert(70);
+    tree.insert(60);
+
+    tree.remove(150);
+    tree.remove(100);
+    EXPECT_THAT(*tree.preorder(), testing::ElementsAre(60, 50, 30, 70));
+    EXPECT_THAT(*tree.inorder(), testing::ElementsAre(30, 50, 60, 70));
+    EXPECT_THAT(*tree.postorder(), testing::ElementsAre(30, 50, 70, 60));
 }
